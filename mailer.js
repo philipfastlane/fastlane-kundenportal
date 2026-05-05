@@ -1,39 +1,22 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const PORTAL_URL = process.env.PORTAL_URL || 'http://localhost:5173';
+const FROM = `FastLane Solutions <${process.env.EMAIL_USER || 'onboarding@resend.dev'}>`;
 
-function getFrom() {
-  return `"FastLane Solutions" <${process.env.EMAIL_USER || 'philip@fastlanesolutions.de'}>`;
-}
-
-// --- Transport -----------------------------------------------------------
-function createTransport() {
-  if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
-    return nodemailer.createTransport({
-      host:   'smtp.gmail.com',
-      port:   587,
-      secure: false,
-      requireTLS: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
-  }
-  // Development fallback: log to console, no actual sending
-  return null;
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null;
+  return new Resend(process.env.RESEND_API_KEY);
 }
 
 async function send(to, subject, html, textFallback) {
-  const transport = createTransport();
-  if (transport) {
-    await transport.sendMail({ from: getFrom(), to, subject, html, text: textFallback });
-    console.log(`📧 E-Mail gesendet an ${to}: ${subject}`);
+  const resend = getResend();
+  if (resend) {
+    await resend.emails.send({ from: FROM, to, subject, html, text: textFallback });
+    console.log(`E-Mail gesendet an ${to}: ${subject}`);
   } else {
-    // Console preview when SMTP is not configured
     const line = '─'.repeat(62);
     console.log(`\n${line}`);
-    console.log(`📧  E-MAIL (Vorschau – kein SMTP konfiguriert)`);
+    console.log(`E-MAIL (Vorschau - kein RESEND_API_KEY konfiguriert)`);
     console.log(line);
     console.log(`An:      ${to}`);
     console.log(`Betreff: ${subject}`);
