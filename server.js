@@ -20,6 +20,7 @@ app.use(express.json());
 
 // Uploaded PDFs / contract files
 const uploadsDir = process.env.UPLOADS_PATH || path.join(__dirname, 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
 
 // Customer-facing routes

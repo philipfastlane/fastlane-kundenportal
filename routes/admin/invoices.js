@@ -9,8 +9,8 @@ const { sendNewInvoiceEmail } = require('../../mailer');
 const router = express.Router();
 router.use(adminAuth);
 
-const uploadDir = path.join(__dirname, '../../uploads/invoices');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+const uploadDir = path.join(process.env.UPLOADS_PATH || path.join(__dirname, '../../uploads'), 'invoices');
+fs.mkdirSync(uploadDir, { recursive: true });
 
 const upload = multer({
   storage: multer.diskStorage({
