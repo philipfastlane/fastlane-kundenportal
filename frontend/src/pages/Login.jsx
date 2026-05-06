@@ -97,9 +97,6 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="login-hint">
-            Demo: <strong>max@mustermann.de</strong> &nbsp;/&nbsp; <strong>demo123</strong>
-          </div>
         </div>
       </div>
     </div>
