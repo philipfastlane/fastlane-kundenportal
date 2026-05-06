@@ -93,12 +93,14 @@ router.delete('/:id', (req, res) => {
   if (!db.prepare('SELECT id FROM customers WHERE id = ?').get(req.params.id)) {
     return res.status(404).json({ error: 'Kunde nicht gefunden' });
   }
-  db.prepare('DELETE FROM ticket_replies WHERE ticket_id IN (SELECT id FROM tickets WHERE customer_id = ?)').run(req.params.id);
-  db.prepare('DELETE FROM tickets   WHERE customer_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM invoices  WHERE customer_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM contracts WHERE customer_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM contacts  WHERE customer_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM customers WHERE id = ?').run(req.params.id);
+  db.prepare('DELETE FROM ticket_replies        WHERE ticket_id IN (SELECT id FROM tickets WHERE customer_id = ?)').run(req.params.id);
+  db.prepare('DELETE FROM tickets               WHERE customer_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM invoices              WHERE customer_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM contracts             WHERE customer_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM contacts              WHERE customer_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM activity_log          WHERE customer_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM password_reset_tokens WHERE customer_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM customers             WHERE id = ?').run(req.params.id);
   res.json({ success: true });
 });
 
