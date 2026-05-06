@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [invoices, setInvoices] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
@@ -27,17 +28,14 @@ export default function Dashboard() {
       setInvoices(i.data);
       setTickets(t.data);
       setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+      setError(true);
     });
   }, []);
 
-  if (loading) {
-    return (
-      <div className="loading-state">
-        <div className="spinner" />
-        Daten werden geladen...
-      </div>
-    );
-  }
+  if (loading) return <div className="loading-state"><div className="spinner" />Daten werden geladen...</div>;
+  if (error) return <div className="loading-state">Daten konnten nicht geladen werden. Bitte Seite neu laden.</div>;
 
   const activeContracts = contracts.filter((c) => c.status === 'aktiv').length;
   const openInvoicesAmount = invoices
