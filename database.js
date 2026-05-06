@@ -90,6 +90,7 @@ db.exec(`
 // Safe schema migrations
 try { db.exec('ALTER TABLE invoices ADD COLUMN pdf_path TEXT'); } catch (_) {}
 try { db.exec('ALTER TABLE contracts ADD COLUMN pdf_path TEXT'); } catch (_) {}
+try { db.exec('ALTER TABLE customers ADD COLUMN must_change_password INTEGER DEFAULT 0'); } catch (_) {}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS password_reset_tokens (

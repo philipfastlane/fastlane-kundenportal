@@ -8,6 +8,7 @@ import Contracts from './pages/Contracts';
 import Contacts from './pages/Contacts';
 import Invoices from './pages/Invoices';
 import Tickets from './pages/Tickets';
+import Settings from './pages/Settings';
 
 import AdminLogin from './admin/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
@@ -41,6 +42,7 @@ export default function App() {
           <Route path="ansprechpartner" element={<Contacts />} />
           <Route path="rechnungen"      element={<Invoices />} />
           <Route path="tickets"         element={<Tickets />} />
+          <Route path="einstellungen"   element={<Settings />} />
         </Route>
 
         {/* Admin area */}

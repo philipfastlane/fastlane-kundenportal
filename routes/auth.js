@@ -22,7 +22,7 @@ router.post('/login', (req, res) => {
 
   const payload = { id: customer.id, name: customer.name, email: customer.email, company: customer.company };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
-  res.json({ token, user: payload });
+  res.json({ token, user: { ...payload, must_change_password: customer.must_change_password === 1 } });
 });
 
 router.post('/forgot-password', async (req, res) => {

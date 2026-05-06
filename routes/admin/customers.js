@@ -59,7 +59,7 @@ router.post('/', (req, res) => {
   }
   const generatedPassword = generatePassword();
   const hash = bcrypt.hashSync(generatedPassword, 10);
-  const r = db.prepare('INSERT INTO customers (name, email, password_hash, company) VALUES (?, ?, ?, ?)').run(
+  const r = db.prepare('INSERT INTO customers (name, email, password_hash, company, must_change_password) VALUES (?, ?, ?, ?, 1)').run(
     name.trim(), email.toLowerCase().trim(), hash, company?.trim() || null
   );
   const customer = db.prepare('SELECT id, name, email, company, created_at FROM customers WHERE id = ?').get(r.lastInsertRowid);

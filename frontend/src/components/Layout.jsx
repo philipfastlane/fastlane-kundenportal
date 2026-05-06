@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Receipt,
-  TicketCheck, LogOut, Menu, X,
+  TicketCheck, LogOut, Menu, X, Settings,
 } from 'lucide-react';
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { to: '/ansprechpartner', icon: Users,            label: 'Ansprechpartner' },
   { to: '/rechnungen',      icon: Receipt,          label: 'Rechnungen'      },
   { to: '/tickets',         icon: TicketCheck,      label: 'Support-Tickets' },
+  { to: '/einstellungen',   icon: Settings,         label: 'Einstellungen'   },
 ];
 
 function FastLaneLogo() {
