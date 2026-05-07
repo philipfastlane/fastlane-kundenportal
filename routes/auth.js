@@ -19,10 +19,12 @@ router.post('/login', (req, res) => {
   }
 
   db.prepare(`INSERT INTO activity_log (customer_id, event_type, description) VALUES (?, 'login', 'Kunde hat sich angemeldet')`).run(customer.id);
+  const previousLogin = customer.last_login;
+  db.prepare(`UPDATE customers SET last_login = datetime('now') WHERE id = ?`).run(customer.id);
 
   const payload = { id: customer.id, name: customer.name, email: customer.email, company: customer.company };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
-  res.json({ token, user: { ...payload, must_change_password: customer.must_change_password === 1 } });
+  res.json({ token, user: { ...payload, must_change_password: customer.must_change_password === 1, last_login: previousLogin } });
 });
 
 router.post('/forgot-password', async (req, res) => {

@@ -130,6 +130,19 @@ async function sendNewContractEmail(customer, contract) {
   await send(customer.email, subject, html, text);
 }
 
+async function sendTicketStatusEmail(customer, ticket, newStatus) {
+  const labels = { 'offen': 'Offen', 'in Bearbeitung': 'In Bearbeitung', 'gelöst': 'Gelöst', 'geschlossen': 'Geschlossen' };
+  const subject = `Ticket-Update: ${ticket.title}`;
+  const html = wrap(
+    h2('Ihr Support-Ticket wurde aktualisiert') +
+    p(`Hallo <strong>${customer.name}</strong>,<br>der Status Ihres Tickets hat sich geändert.`) +
+    box([['Ticket', ticket.title], ['Neuer Status', labels[newStatus] || newStatus]]) +
+    btn(`${PORTAL_URL}/tickets`, 'Ticket im Portal ansehen')
+  );
+  const text = `Hallo ${customer.name},\n\nIhr Ticket "${ticket.title}" hat einen neuen Status: ${newStatus}\n\n${PORTAL_URL}/tickets\n\nFastLane Solutions`;
+  await send(customer.email, subject, html, text);
+}
+
 async function sendTicketReplyEmail(customer, ticket, reply, adminName) {
   const subject = `Antwort auf Ihr Ticket: ${ticket.title}`;
   const html = wrap(
@@ -148,5 +161,6 @@ module.exports = {
   sendPasswordResetEmail,
   sendNewInvoiceEmail,
   sendNewContractEmail,
+  sendTicketStatusEmail,
   sendTicketReplyEmail,
 };

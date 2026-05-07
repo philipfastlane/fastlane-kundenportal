@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 
+const legalLink = { fontSize: 11, color: 'var(--text-dim)', textDecoration: 'none', transition: 'color .15s' };
+
 function FastLaneLogo() {
   return (
     <div className="logo-text">
@@ -102,6 +104,10 @@ export default function Login() {
           </form>
 
         </div>
+      </div>
+      <div style={{ textAlign: 'center', padding: '16px 0 24px', display: 'flex', justifyContent: 'center', gap: 20 }}>
+        <Link to="/impressum" style={legalLink}>Impressum</Link>
+        <Link to="/datenschutz" style={legalLink}>Datenschutz</Link>
       </div>
     </div>
   );

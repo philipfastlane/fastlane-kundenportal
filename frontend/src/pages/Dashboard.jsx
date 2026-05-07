@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const fmtLogin = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
 
   useEffect(() => {
     Promise.all([
@@ -48,8 +49,11 @@ export default function Dashboard() {
     <>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Willkommen, {user.name?.split(' ')[0]} 👋</h1>
-          <p className="page-subtitle">Hier ist Ihre aktuelle Übersicht für {user.company}</p>
+          <h1 className="page-title">Willkommen, {user.name?.split(' ')[0]}</h1>
+          <p className="page-subtitle">
+            Ihre aktuelle Übersicht{user.company ? ` für ${user.company}` : ''}
+            {fmtLogin(user.last_login) && <span style={{ marginLeft: 12, fontSize: 12, color: 'var(--text-dim)' }}>· Zuletzt angemeldet: {fmtLogin(user.last_login)}</span>}
+          </p>
         </div>
       </div>
 

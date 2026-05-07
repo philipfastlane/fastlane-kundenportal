@@ -56,8 +56,8 @@ export default function Contracts() {
       {contracts.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">📄</div>
-          <div className="empty-title">Keine Verträge vorhanden</div>
-          <div className="empty-text">Kontaktieren Sie Ihren Ansprechpartner für weitere Informationen.</div>
+          <div className="empty-title">Noch keine Verträge</div>
+          <div className="empty-text">Ihre Verträge werden hier angezeigt, sobald diese durch FastLane Solutions eingerichtet wurden. Bei Fragen wenden Sie sich gerne an Ihren Ansprechpartner.</div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

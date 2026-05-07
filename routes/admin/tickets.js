@@ -1,7 +1,7 @@
 const express = require('express');
 const adminAuth = require('../../middleware/adminAuth');
 const db = require('../../database');
-const { sendTicketReplyEmail } = require('../../mailer');
+const { sendTicketReplyEmail, sendTicketStatusEmail } = require('../../mailer');
 
 const router = express.Router();
 router.use(adminAuth);
@@ -25,9 +25,8 @@ router.get('/:id', (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-  if (!db.prepare('SELECT id FROM tickets WHERE id = ?').get(req.params.id)) {
-    return res.status(404).json({ error: 'Ticket nicht gefunden' });
-  }
+  const existing = db.prepare('SELECT * FROM tickets WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Ticket nicht gefunden' });
   const { status, priority } = req.body;
   db.prepare(`
     UPDATE tickets SET
@@ -36,7 +35,18 @@ router.put('/:id', (req, res) => {
       updated_at = datetime('now')
     WHERE id = ?
   `).run(status || null, priority || null, req.params.id);
-  res.json(db.prepare('SELECT * FROM tickets WHERE id = ?').get(req.params.id));
+  const updated = db.prepare('SELECT * FROM tickets WHERE id = ?').get(req.params.id);
+
+  if (status && status !== existing.status) {
+    const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(existing.customer_id);
+    if (customer) {
+      sendTicketStatusEmail(customer, updated, status).catch((err) => console.error('Status-E-Mail Fehler:', err.message));
+      db.prepare('INSERT INTO notifications (customer_id, type, title, message) VALUES (?, ?, ?, ?)').run(
+        existing.customer_id, 'ticket_reply', `Ticket-Update: ${updated.title}`, `Neuer Status: ${status}`
+      );
+    }
+  }
+  res.json(updated);
 });
 
 router.post('/:id/reply', (req, res) => {

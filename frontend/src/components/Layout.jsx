@@ -190,11 +190,20 @@ export default function Layout() {
           </nav>
 
           <div className="sidebar-footer">
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{user.name}</div>
-              <div className="user-email">{user.email}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent)', color: '#141414', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
+                {user.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
+                <div className="user-email" style={{ marginBottom: 0 }}>{user.email}</div>
+              </div>
             </div>
             <button className="logout-btn" onClick={logout}><LogOut size={13} />Abmelden</button>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 12 }}>
+              <a href="/impressum" style={{ fontSize: 11, color: 'var(--text-dim)', textDecoration: 'none' }}>Impressum</a>
+              <a href="/datenschutz" style={{ fontSize: 11, color: 'var(--text-dim)', textDecoration: 'none' }}>Datenschutz</a>
+            </div>
           </div>
         </aside>
 

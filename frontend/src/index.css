@@ -798,6 +798,11 @@ tbody tr:hover td { background: rgba(255,255,255,0.02); }
   .modal-wide { max-width: 100%; }
 }
 
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 /* ============================================
    LIGHT THEME
    ============================================ */

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastProvider } from './components/Toast';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
@@ -9,6 +10,8 @@ import Contacts from './pages/Contacts';
 import Invoices from './pages/Invoices';
 import Tickets from './pages/Tickets';
 import Settings from './pages/Settings';
+import Impressum from './pages/Impressum';
+import Datenschutz from './pages/Datenschutz';
 
 import AdminLogin from './admin/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
@@ -30,9 +33,12 @@ function AdminRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+    <ToastProvider>
       <Routes>
         {/* Customer portal */}
         <Route path="/login" element={<Login />} />
+        <Route path="/impressum" element={<Impressum />} />
+        <Route path="/datenschutz" element={<Datenschutz />} />
         <Route path="/passwort-vergessen" element={<ForgotPassword />} />
         <Route path="/passwort-zuruecksetzen" element={<ResetPassword />} />
         <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
@@ -60,6 +66,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
+    </ToastProvider>
     </BrowserRouter>
   );
 }

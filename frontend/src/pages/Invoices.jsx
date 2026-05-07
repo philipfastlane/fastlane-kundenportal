@@ -56,7 +56,8 @@ export default function Invoices() {
       {invoices.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🧾</div>
-          <div className="empty-title">Keine Rechnungen vorhanden</div>
+          <div className="empty-title">Noch keine Rechnungen</div>
+          <div className="empty-text">Ihre Rechnungen werden hier angezeigt, sobald diese durch FastLane Solutions erstellt wurden.</div>
         </div>
       ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
