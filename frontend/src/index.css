@@ -797,3 +797,58 @@ tbody tr:hover td { background: rgba(255,255,255,0.02); }
   .form-row { grid-template-columns: 1fr; }
   .modal-wide { max-width: 100%; }
 }
+
+/* ============================================
+   LIGHT THEME
+   ============================================ */
+[data-theme="light"] {
+  --bg:            #f4f4ef;
+  --bg-secondary:  #eaeae6;
+  --card:          #ffffff;
+  --card-hover:    #f8f8f4;
+  --sidebar-bg:    #ffffff;
+  --header-bg:     #ffffff;
+  --text:          #141414;
+  --text-muted:    #5e5e5e;
+  --text-dim:      #9e9e9e;
+  --border:        #e2e2db;
+  --border-subtle: #ebebea;
+  --shadow:        0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:     0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg:     0 20px 50px rgba(0,0,0,.10);
+  --s-green-bg:    rgba(168, 204, 48, 0.14);
+  --s-green-txt:   #527000;
+  --s-yellow-bg:   rgba(180, 130, 20, 0.12);
+  --s-yellow-txt:  #8a5e00;
+  --s-red-bg:      rgba(220, 60, 60, 0.10);
+  --s-red-txt:     #b83232;
+  --s-blue-bg:     rgba(59, 130, 246, 0.10);
+  --s-blue-txt:    #1d5fb5;
+  --s-gray-bg:     rgba(0, 0, 0, 0.06);
+  --s-gray-txt:    #6b6b6b;
+  --accent-dim:    rgba(168, 204, 48, 0.12);
+  --accent-border: rgba(168, 204, 48, 0.30);
+}
+
+[data-theme="light"] thead                       { background: #f0f0ea; }
+[data-theme="light"] tbody tr:hover td           { background: rgba(0,0,0,.02); }
+[data-theme="light"] .form-input,
+[data-theme="light"] .form-select,
+[data-theme="light"] .form-textarea              { background: #f4f4ef; }
+[data-theme="light"] .form-select option         { background: #ffffff; }
+[data-theme="light"] .modal                      { background: #ffffff; }
+[data-theme="light"] .logo-solutions             { color: rgba(20,20,20,.85); }
+[data-theme="light"] .logout-btn                 { border-color: #e2e2db; }
+[data-theme="light"] .sidebar-overlay            { background: rgba(0,0,0,.45); }
+[data-theme="light"] .nav-link:hover             { background: rgba(0,0,0,.04); }
+[data-theme="light"] .hamburger-global:hover     { background: rgba(0,0,0,.06); color: var(--text); }
+[data-theme="light"] .btn-secondary              { border-color: #d5d5cf; }
+[data-theme="light"] .btn-secondary:hover        { background: rgba(0,0,0,.04); border-color: #bbb; }
+[data-theme="light"] .btn-icon:hover             { background: #f0f0ea; border-color: #d0d0ca; }
+[data-theme="light"] .modal-close:hover          { background: rgba(0,0,0,.07); color: var(--text); }
+[data-theme="light"] .modal-overlay              { background: rgba(0,0,0,.50); }
+[data-theme="light"] .login-body::before {
+  background-image:
+    linear-gradient(rgba(168,204,48,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168,204,48,.07) 1px, transparent 1px);
+}

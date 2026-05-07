@@ -4,8 +4,12 @@ import {
   LayoutDashboard, FileText, Users, Receipt,
   TicketCheck, LogOut, Menu, X, Settings, Bell,
   Receipt as InvoiceIcon, FileText as ContractIcon, MessageSquare,
+  Sun, Moon,
 } from 'lucide-react';
 import api from '../api';
+
+const getTheme = () => localStorage.getItem('theme') || 'dark';
+const applyTheme = (t) => { localStorage.setItem('theme', t); document.documentElement.setAttribute('data-theme', t); };
 
 const navItems = [
   { to: '/dashboard',       icon: LayoutDashboard, label: 'Dashboard'       },
@@ -43,8 +47,11 @@ function FastLaneLogo() {
 
 export default function Layout() {
   const [open, setOpen] = useState(false);
+  const [theme, setThemeState] = useState(getTheme);
   const [notifications, setNotifications] = useState([]);
   const [showBell, setShowBell] = useState(false);
+
+  const toggleTheme = () => { const t = theme === 'dark' ? 'light' : 'dark'; setThemeState(t); applyTheme(t); };
   const bellRef = useRef(null);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -86,6 +93,11 @@ export default function Layout() {
         <FastLaneLogo />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="portal-btn">Kundenportal</span>
+
+          {/* Theme Toggle */}
+          <button onClick={toggleTheme} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }} aria-label="Theme wechseln">
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
 
           {/* Notification Bell */}
           <div ref={bellRef} style={{ position: 'relative' }}>

@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, Receipt,
-  UserRound, TicketCheck, LogOut, Menu, X, ShieldCheck, Activity,
+  UserRound, TicketCheck, LogOut, Menu, X, ShieldCheck, Activity, Sun, Moon,
 } from 'lucide-react';
+
+const getTheme = () => localStorage.getItem('theme') || 'dark';
+const applyTheme = (t) => { localStorage.setItem('theme', t); document.documentElement.setAttribute('data-theme', t); };
 
 const navItems = [
   { to: '/admin/dashboard',       icon: LayoutDashboard, label: 'Dashboard'       },
@@ -17,7 +20,10 @@ const navItems = [
 
 export default function AdminLayout() {
   const [open, setOpen] = useState(false);
+  const [theme, setThemeState] = useState(getTheme);
   const navigate = useNavigate();
+
+  const toggleTheme = () => { const t = theme === 'dark' ? 'light' : 'dark'; setThemeState(t); applyTheme(t); };
   const admin = JSON.parse(localStorage.getItem('adminUser') || '{}');
 
   const logout = () => {
@@ -33,11 +39,14 @@ export default function AdminLayout() {
           <span className="logo-fast">FastLane</span>
           <span className="logo-solutions"> Solutions</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="admin-nav-badge">
             <ShieldCheck size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
             Admin
           </span>
+          <button onClick={toggleTheme} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }} aria-label="Theme wechseln">
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <button className="hamburger-global" onClick={() => setOpen(!open)} aria-label="Menü">
             {open ? <X size={20} /> : <Menu size={20} />}
           </button>
