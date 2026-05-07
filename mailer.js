@@ -156,6 +156,19 @@ async function sendTicketReplyEmail(customer, ticket, reply, adminName) {
   await send(customer.email, subject, html, text);
 }
 
+async function sendTwoFactorEmail(customer, code) {
+  const subject = 'Ihr Anmelde-Code – FastLane Kundenportal';
+  const html = wrap(
+    h2('Zwei-Faktor-Authentifizierung') +
+    p(`Hallo <strong>${customer.name}</strong>,<br>geben Sie den folgenden Code ein, um sich anzumelden:`) +
+    `<div style="text-align:center;margin:28px 0;"><span style="font-size:36px;font-weight:800;letter-spacing:10px;color:#a8cc30;font-family:monospace;">${code}</span></div>` +
+    p('<strong>Dieser Code ist 10 Minuten gültig</strong> und kann nur einmal verwendet werden.') +
+    p('Falls Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail. Ihr Konto bleibt sicher.')
+  );
+  const text = `Hallo ${customer.name},\n\nIhr 2FA-Code: ${code}\n\nGültig für 10 Minuten.\n\nFastLane Solutions`;
+  await send(customer.email, subject, html, text);
+}
+
 module.exports = {
   sendWelcomeEmail,
   sendPasswordResetEmail,
@@ -163,4 +176,5 @@ module.exports = {
   sendNewContractEmail,
   sendTicketStatusEmail,
   sendTicketReplyEmail,
+  sendTwoFactorEmail,
 };

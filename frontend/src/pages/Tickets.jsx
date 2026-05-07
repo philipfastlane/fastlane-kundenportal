@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Plus, X, Send } from 'lucide-react';
+import { Plus, X, Send, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../api';
 import StatusBadge, { PriorityBadge } from '../components/StatusBadge';
 
@@ -7,6 +7,8 @@ const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
 
 const EMPTY_FORM = { title: '', description: '', priority: 'mittel' };
+const STATUS_OPTIONS = ['alle', 'offen', 'in Bearbeitung', 'gelöst', 'geschlossen'];
+const PAGE_SIZE = 10;
 
 export default function Tickets() {
   const [tickets, setTickets] = useState([]);
@@ -15,6 +17,10 @@ export default function Tickets() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('alle');
+  const [page, setPage] = useState(1);
 
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -55,7 +61,7 @@ export default function Tickets() {
     setReplySending(true);
     try {
       const { data } = await api.post(`/tickets/${detail.id}/reply`, { message: replyText.trim() });
-      setDetail(prev => ({ ...prev, replies: [...prev.replies, data] }));
+      setDetail((prev) => ({ ...prev, replies: [...prev.replies, data] }));
       setReplyText('');
       setTimeout(() => repliesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
     } finally { setReplySending(false); }
@@ -64,6 +70,18 @@ export default function Tickets() {
   const open = tickets.filter((t) => t.status !== 'gelöst' && t.status !== 'geschlossen').length;
 
   if (loading) return <div className="loading-state"><div className="spinner" /> Tickets werden geladen...</div>;
+
+  const filtered = tickets.filter((t) => {
+    const matchStatus = statusFilter === 'alle' || t.status === statusFilter;
+    const q = search.toLowerCase();
+    const matchSearch = !q || t.title.toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q);
+    return matchStatus && matchSearch;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const resetPage = () => setPage(1);
 
   return (
     <>
@@ -85,21 +103,67 @@ export default function Tickets() {
           </button>
         </div>
       ) : (
-        <div className="ticket-list">
-          {tickets.map((t) => (
-            <div key={t.id} className={`ticket-item prio-${t.priority}`} onClick={() => openDetail(t)} style={{ cursor: 'pointer' }}>
-              <div>
-                <div className="ticket-title">{t.title}</div>
-                <div className="ticket-desc">{t.description}</div>
-                <div className="ticket-meta">
-                  <StatusBadge value={t.status} />
-                  <PriorityBadge value={t.priority} />
-                  <span className="ticket-date">{fmtDate(t.created_at)}</span>
+        <>
+          {/* Filter-Leiste */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flex: '1 1 220px' }}>
+              <Search size={15} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+              <input
+                className="form-input"
+                style={{ paddingLeft: 34, marginBottom: 0 }}
+                placeholder="Suche nach Betreff…"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); resetPage(); }}
+              />
+            </div>
+            <select
+              className="form-select"
+              style={{ flex: '0 0 180px', marginBottom: 0 }}
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }}
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="ticket-list">
+            {paginated.length === 0 ? (
+              <div className="card" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 14, padding: 32 }}>
+                Keine Tickets gefunden.
+              </div>
+            ) : (
+              paginated.map((t) => (
+                <div key={t.id} className={`ticket-item prio-${t.priority}`} onClick={() => openDetail(t)} style={{ cursor: 'pointer' }}>
+                  <div>
+                    <div className="ticket-title">{t.title}</div>
+                    <div className="ticket-desc">{t.description}</div>
+                    <div className="ticket-meta">
+                      <StatusBadge value={t.status} />
+                      <PriorityBadge value={t.priority} />
+                      <span className="ticket-date">{fmtDate(t.created_at)}</span>
+                    </div>
+                  </div>
                 </div>
+              ))
+            )}
+          </div>
+
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
+              <span>{filtered.length} Ergebnisse · Seite {safePage} von {totalPages}</span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button className="btn btn-secondary" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage === 1} style={{ padding: '6px 10px' }}>
+                  <ChevronLeft size={16} />
+                </button>
+                <button className="btn btn-secondary" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={safePage === totalPages} style={{ padding: '6px 10px' }}>
+                  <ChevronRight size={16} />
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       {/* Ticket erstellen Modal */}
@@ -197,7 +261,7 @@ export default function Tickets() {
                 <textarea
                   className="form-textarea"
                   style={{ flex: 1, minHeight: 64, resize: 'none', marginBottom: 0 }}
-                  placeholder="Antwort schreiben..."
+                  placeholder="Antwort schreiben… (Strg+Enter zum Senden)"
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendReply(e); }}

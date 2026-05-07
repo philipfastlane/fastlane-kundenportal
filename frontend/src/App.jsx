@@ -12,6 +12,7 @@ import Tickets from './pages/Tickets';
 import Settings from './pages/Settings';
 import Impressum from './pages/Impressum';
 import Datenschutz from './pages/Datenschutz';
+import AGB from './pages/AGB';
 
 import AdminLogin from './admin/AdminLogin';
 import AdminLayout from './admin/AdminLayout';
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/impressum" element={<Impressum />} />
         <Route path="/datenschutz" element={<Datenschutz />} />
+        <Route path="/agb" element={<AGB />} />
         <Route path="/passwort-vergessen" element={<ForgotPassword />} />
         <Route path="/passwort-zuruecksetzen" element={<ResetPassword />} />
         <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>

@@ -112,6 +112,7 @@ router.delete('/:id', (req, res) => {
   db.prepare('DELETE FROM activity_log          WHERE customer_id = ?').run(req.params.id);
   db.prepare('DELETE FROM password_reset_tokens WHERE customer_id = ?').run(req.params.id);
   db.prepare('DELETE FROM notifications         WHERE customer_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM login_otp             WHERE customer_id = ?').run(req.params.id);
   db.prepare('DELETE FROM customers             WHERE id = ?').run(req.params.id);
   res.json({ success: true });
 });

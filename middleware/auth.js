@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'kundenportal-geheimschluessel-2024';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) { console.error('FATAL: JWT_SECRET nicht gesetzt'); process.exit(1); }
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const ADMIN_SECRET = process.env.ADMIN_JWT_SECRET || 'fastlane-admin-geheimschluessel-2024';
+const ADMIN_SECRET = process.env.ADMIN_JWT_SECRET;
+if (!ADMIN_SECRET) { console.error('FATAL: ADMIN_JWT_SECRET nicht gesetzt'); process.exit(1); }
 
 module.exports = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Receipt,
@@ -7,6 +7,8 @@ import {
   Sun, Moon,
 } from 'lucide-react';
 import api from '../api';
+import { useSessionTimeout } from '../hooks/useSessionTimeout';
+import OnboardingBanner from './OnboardingBanner';
 
 const getTheme = () => localStorage.getItem('theme') || 'dark';
 const applyTheme = (t) => { localStorage.setItem('theme', t); document.documentElement.setAttribute('data-theme', t); };
@@ -21,7 +23,7 @@ const navItems = [
 ];
 
 const notifIcon = (type) => {
-  if (type === 'new_invoice') return <InvoiceIcon size={14} color="var(--accent)" />;
+  if (type === 'new_invoice')  return <InvoiceIcon  size={14} color="var(--accent)" />;
   if (type === 'new_contract') return <ContractIcon size={14} color="var(--accent)" />;
   return <MessageSquare size={14} color="var(--accent)" />;
 };
@@ -29,7 +31,7 @@ const notifIcon = (type) => {
 const fmtRelative = (d) => {
   const diff = Date.now() - new Date(d).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return 'Gerade eben';
+  if (m < 1)  return 'Gerade eben';
   if (m < 60) return `vor ${m} Min.`;
   const h = Math.floor(m / 60);
   if (h < 24) return `vor ${h} Std.`;
@@ -46,15 +48,51 @@ function FastLaneLogo() {
 }
 
 export default function Layout() {
-  const [open, setOpen] = useState(false);
-  const [theme, setThemeState] = useState(getTheme);
+  const [open, setOpen]               = useState(false);
+  const [theme, setThemeState]        = useState(getTheme);
   const [notifications, setNotifications] = useState([]);
-  const [showBell, setShowBell] = useState(false);
+  const [showBell, setShowBell]       = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
+  const [countdown, setCountdown]     = useState(300);
 
   const toggleTheme = () => { const t = theme === 'dark' ? 'light' : 'dark'; setThemeState(t); applyTheme(t); };
-  const bellRef = useRef(null);
+  const bellRef  = useRef(null);
+  const countRef = useRef(null);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const fmtLogin = (d) => d ? new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  }, [navigate]);
+
+  const handleWarning = useCallback(() => {
+    setShowWarning(true);
+    setCountdown(300);
+  }, []);
+
+  const extendSession = useCallback(() => {
+    setShowWarning(false);
+    clearInterval(countRef.current);
+  }, []);
+
+  const resetTimer = useSessionTimeout(handleWarning, logout);
+
+  useEffect(() => {
+    if (showWarning) {
+      countRef.current = setInterval(() => {
+        setCountdown((c) => {
+          if (c <= 1) { clearInterval(countRef.current); return 0; }
+          return c - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(countRef.current);
+    }
+    return () => clearInterval(countRef.current);
+  }, [showWarning]);
 
   useEffect(() => {
     api.get('/notifications').then((r) => setNotifications(r.data)).catch(() => {});
@@ -79,13 +117,9 @@ export default function Layout() {
     setShowBell(false);
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
-
   const close = () => setOpen(false);
+
+  const fmtCountdown = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
   return (
     <>
@@ -94,12 +128,10 @@ export default function Layout() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="portal-btn">Kundenportal</span>
 
-          {/* Theme Toggle */}
           <button onClick={toggleTheme} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }} aria-label="Theme wechseln">
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          {/* Notification Bell */}
           <div ref={bellRef} style={{ position: 'relative' }}>
             <button
               onClick={() => setShowBell(!showBell)}
@@ -108,48 +140,26 @@ export default function Layout() {
             >
               <Bell size={18} />
               {unread > 0 && (
-                <span style={{
-                  position: 'absolute', top: 2, right: 2,
-                  background: '#e53e3e', color: '#fff', borderRadius: '50%',
-                  width: 16, height: 16, fontSize: 10, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+                <span style={{ position: 'absolute', top: 2, right: 2, background: '#e53e3e', color: '#fff', borderRadius: '50%', width: 16, height: 16, fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
             </button>
 
             {showBell && (
-              <div style={{
-                position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 320,
-                background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12,
-                boxShadow: '0 8px 24px rgba(0,0,0,.15)', zIndex: 1000, overflow: 'hidden',
-              }}>
+              <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 320, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,.15)', zIndex: 1000, overflow: 'hidden' }}>
                 <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>Benachrichtigungen</span>
                   {unread > 0 && (
-                    <button onClick={markAllRead} style={{ fontSize: 12, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
-                      Alle lesen
-                    </button>
+                    <button onClick={markAllRead} style={{ fontSize: 12, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Alle lesen</button>
                   )}
                 </div>
-
                 <div style={{ maxHeight: 360, overflowY: 'auto' }}>
                   {notifications.length === 0 ? (
-                    <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-                      Keine Benachrichtigungen
-                    </div>
+                    <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>Keine Benachrichtigungen</div>
                   ) : (
                     notifications.map((n) => (
-                      <div
-                        key={n.id}
-                        onClick={() => markRead(n.id)}
-                        style={{
-                          padding: '12px 16px', borderBottom: '1px solid var(--border)',
-                          background: n.read ? 'transparent' : 'rgba(168,204,48,0.06)',
-                          cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'flex-start',
-                        }}
-                      >
+                      <div key={n.id} onClick={() => markRead(n.id)} style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', background: n.read ? 'transparent' : 'rgba(168,204,48,0.06)', cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                         <div style={{ marginTop: 2, flexShrink: 0 }}>{notifIcon(n.type)}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 13, fontWeight: n.read ? 400 : 600, color: 'var(--text)', lineHeight: 1.4 }}>{n.title}</div>
@@ -192,7 +202,7 @@ export default function Layout() {
           <div className="sidebar-footer">
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent)', color: '#141414', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
-                {user.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                {user.name?.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()}
               </div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
@@ -203,16 +213,37 @@ export default function Layout() {
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 12 }}>
               <a href="/impressum" style={{ fontSize: 11, color: 'var(--text-dim)', textDecoration: 'none' }}>Impressum</a>
               <a href="/datenschutz" style={{ fontSize: 11, color: 'var(--text-dim)', textDecoration: 'none' }}>Datenschutz</a>
+              <a href="/agb" style={{ fontSize: 11, color: 'var(--text-dim)', textDecoration: 'none' }}>AGB</a>
             </div>
           </div>
         </aside>
 
         <div className="main-content">
           <div className="page-body">
+            <OnboardingBanner />
             <Outlet />
           </div>
         </div>
       </div>
+
+      {/* Session-Warning Modal */}
+      {showWarning && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: '32px 36px', maxWidth: 400, width: '100%', textAlign: 'center' }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>⏱</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>Sitzung läuft ab</div>
+            <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
+              Sie werden in <strong style={{ color: 'var(--accent)', fontSize: 16 }}>{fmtCountdown(countdown)}</strong> Minuten automatisch abgemeldet.
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className="btn btn-secondary" onClick={logout}>Jetzt abmelden</button>
+              <button className="btn btn-primary" onClick={() => { extendSession(); resetTimer(); }}>
+                Sitzung verlängern
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

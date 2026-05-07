@@ -39,8 +39,19 @@ const resetLimiter = rateLimit({
   message: { error: 'Zu viele Anfragen. Bitte warten Sie eine Stunde.' },
 });
 
+// General limiter: 300 requests per 15 min per IP
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.' },
+});
+app.use('/api/', generalLimiter);
+
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/admin/auth/login', loginLimiter);
+app.use('/api/auth/verify-2fa', loginLimiter);
 app.use('/api/auth/forgot-password', resetLimiter);
 
 // Uploaded PDFs / contract files

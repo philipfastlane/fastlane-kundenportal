@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../../database');
+const { validatePasswordStrength } = require('../../utils/password');
 
 const router = express.Router();
 const ADMIN_SECRET = process.env.ADMIN_JWT_SECRET || 'fastlane-admin-geheimschluessel-2024';
@@ -39,9 +40,8 @@ router.put('/profile', requireAdmin, (req, res) => {
   if (!current_password || !new_password) {
     return res.status(400).json({ error: 'Aktuelles und neues Passwort erforderlich' });
   }
-  if (new_password.length < 8) {
-    return res.status(400).json({ error: 'Neues Passwort muss mindestens 8 Zeichen lang sein' });
-  }
+  const strengthError = validatePasswordStrength(new_password);
+  if (strengthError) return res.status(400).json({ error: strengthError });
 
   const admin = db.prepare('SELECT * FROM admins WHERE id = ?').get(req.admin.id);
   if (!admin || !bcrypt.compareSync(current_password, admin.password_hash)) {
