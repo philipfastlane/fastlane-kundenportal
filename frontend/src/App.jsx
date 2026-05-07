@@ -22,6 +22,7 @@ import AdminInvoices from './admin/pages/AdminInvoices';
 import AdminContacts from './admin/pages/AdminContacts';
 import AdminTickets from './admin/pages/AdminTickets';
 import AdminActivities from './admin/pages/AdminActivities';
+import AdminSettings from './admin/pages/AdminSettings';
 
 function PrivateRoute({ children }) {
   return localStorage.getItem('token') ? children : <Navigate to="/login" replace />;
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="ansprechpartner" element={<AdminContacts />} />
           <Route path="tickets"         element={<AdminTickets />} />
           <Route path="aktivitaeten"    element={<AdminActivities />} />
+          <Route path="einstellungen"   element={<AdminSettings />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

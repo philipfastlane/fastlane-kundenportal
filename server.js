@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const rateLimit = require('express-rate-limit');
 
 require('./database');
 
@@ -17,6 +18,17 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Rate limiter for login endpoints: max 10 attempts per 15 minutes per IP
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Zu viele Anmeldeversuche. Bitte warten Sie 15 Minuten.' },
+});
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/admin/auth/login', loginLimiter);
 
 // Uploaded PDFs / contract files
 const uploadsDir = process.env.UPLOADS_PATH || path.join(__dirname, 'uploads');

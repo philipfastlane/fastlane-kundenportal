@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, Receipt,
-  UserRound, TicketCheck, LogOut, Menu, X, ShieldCheck, Activity, Sun, Moon,
+  UserRound, TicketCheck, LogOut, Menu, X, ShieldCheck, Activity, Sun, Moon, Settings,
 } from 'lucide-react';
 
 const getTheme = () => localStorage.getItem('theme') || 'dark';
@@ -16,6 +16,7 @@ const navItems = [
   { to: '/admin/ansprechpartner', icon: UserRound,        label: 'Ansprechpartner' },
   { to: '/admin/tickets',         icon: TicketCheck,      label: 'Tickets'         },
   { to: '/admin/aktivitaeten',    icon: Activity,         label: 'Aktivitäten'     },
+  { to: '/admin/einstellungen',   icon: Settings,         label: 'Einstellungen'   },
 ];
 
 export default function AdminLayout() {
