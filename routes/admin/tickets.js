@@ -52,7 +52,12 @@ router.post('/:id/reply', (req, res) => {
 
   const ticket = db.prepare('SELECT * FROM tickets WHERE id = ?').get(req.params.id);
   const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(ticket.customer_id);
-  if (customer) sendTicketReplyEmail(customer, ticket, message.trim(), req.admin.name).catch((err) => console.error('Ticket-E-Mail Fehler:', err.message));
+  if (customer) {
+    sendTicketReplyEmail(customer, ticket, message.trim(), req.admin.name).catch((err) => console.error('Ticket-E-Mail Fehler:', err.message));
+    db.prepare('INSERT INTO notifications (customer_id, type, title, message) VALUES (?, ?, ?, ?)').run(
+      ticket.customer_id, 'ticket_reply', `Antwort auf: ${ticket.title}`, message.trim().substring(0, 120)
+    );
+  }
 
   res.status(201).json(db.prepare('SELECT * FROM ticket_replies WHERE id = ?').get(r.lastInsertRowid));
 });

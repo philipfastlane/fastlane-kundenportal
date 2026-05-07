@@ -89,6 +89,17 @@ router.put('/:id', (req, res) => {
   res.json(db.prepare('SELECT id, name, email, company, created_at FROM customers WHERE id = ?').get(req.params.id));
 });
 
+router.post('/:id/reset-password', (req, res) => {
+  const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(req.params.id);
+  if (!customer) return res.status(404).json({ error: 'Kunde nicht gefunden' });
+  const newPassword = generatePassword();
+  db.prepare('UPDATE customers SET password_hash = ?, must_change_password = 1 WHERE id = ?').run(
+    bcrypt.hashSync(newPassword, 10), req.params.id
+  );
+  sendWelcomeEmail(customer, newPassword).catch((err) => console.error('Reset-E-Mail Fehler:', err.message));
+  res.json({ success: true, generatedPassword: newPassword });
+});
+
 router.delete('/:id', (req, res) => {
   if (!db.prepare('SELECT id FROM customers WHERE id = ?').get(req.params.id)) {
     return res.status(404).json({ error: 'Kunde nicht gefunden' });
@@ -100,6 +111,7 @@ router.delete('/:id', (req, res) => {
   db.prepare('DELETE FROM contacts              WHERE customer_id = ?').run(req.params.id);
   db.prepare('DELETE FROM activity_log          WHERE customer_id = ?').run(req.params.id);
   db.prepare('DELETE FROM password_reset_tokens WHERE customer_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM notifications         WHERE customer_id = ?').run(req.params.id);
   db.prepare('DELETE FROM customers             WHERE id = ?').run(req.params.id);
   res.json({ success: true });
 });

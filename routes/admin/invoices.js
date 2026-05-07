@@ -44,7 +44,12 @@ router.post('/', upload.single('pdf'), (req, res) => {
   const invoice = db.prepare('SELECT * FROM invoices WHERE id = ?').get(r.lastInsertRowid);
 
   const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(customer_id);
-  if (customer) sendNewInvoiceEmail(customer, invoice).catch((err) => console.error('Rechnungs-E-Mail Fehler:', err.message));
+  if (customer) {
+    sendNewInvoiceEmail(customer, invoice).catch((err) => console.error('Rechnungs-E-Mail Fehler:', err.message));
+    db.prepare('INSERT INTO notifications (customer_id, type, title, message) VALUES (?, ?, ?, ?)').run(
+      customer_id, 'new_invoice', `Neue Rechnung: ${invoice.invoice_number}`, invoice.title
+    );
+  }
 
   res.status(201).json(invoice);
 });

@@ -111,6 +111,17 @@ db.exec(`
     created_at  TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (customer_id) REFERENCES customers(id)
   );
+
+  CREATE TABLE IF NOT EXISTS notifications (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    type        TEXT NOT NULL,
+    title       TEXT NOT NULL,
+    message     TEXT,
+    read        INTEGER DEFAULT 0,
+    created_at  TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+  );
 `);
 
 // Seed admin user

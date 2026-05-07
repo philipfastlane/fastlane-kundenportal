@@ -25,7 +25,8 @@ app.use('/uploads', express.static(uploadsDir));
 
 // Customer-facing routes
 app.use('/api/auth',      require('./routes/auth'));
-app.use('/api/profile',   require('./routes/profile'));
+app.use('/api/profile',       require('./routes/profile'));
+app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/contracts', require('./routes/contracts'));
 app.use('/api/contacts',  require('./routes/contacts'));
 app.use('/api/invoices',  require('./routes/invoices'));

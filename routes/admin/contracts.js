@@ -42,7 +42,12 @@ router.post('/', upload.single('pdf'), (req, res) => {
   const contract = db.prepare('SELECT * FROM contracts WHERE id = ?').get(r.lastInsertRowid);
 
   const customer = db.prepare('SELECT * FROM customers WHERE id = ?').get(customer_id);
-  if (customer) sendNewContractEmail(customer, contract).catch((err) => console.error('Vertrags-E-Mail Fehler:', err.message));
+  if (customer) {
+    sendNewContractEmail(customer, contract).catch((err) => console.error('Vertrags-E-Mail Fehler:', err.message));
+    db.prepare('INSERT INTO notifications (customer_id, type, title, message) VALUES (?, ?, ?, ?)').run(
+      customer_id, 'new_contract', `Neuer Vertrag: ${contract.title}`, contract.description || ''
+    );
+  }
 
   res.status(201).json(contract);
 });

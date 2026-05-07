@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Copy, Check, Mail } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Copy, Check, Mail, KeyRound } from 'lucide-react';
 import adminApi from '../../adminApi';
 
 const EMPTY = { name: '', email: '', company: '', password: '' };
@@ -13,6 +13,8 @@ export default function Customers() {
   const [error, setError]         = useState('');
   const [saving, setSaving]       = useState(false);
   const [delTarget, setDelTarget] = useState(null);
+  const [resetTarget, setResetTarget] = useState(null);
+  const [resetResult, setResetResult] = useState(null);
   const [credentials, setCredentials] = useState(null); // { email, password, name }
   const [copied, setCopied]           = useState('');
 
@@ -51,6 +53,14 @@ export default function Customers() {
     catch (err) { alert(err.response?.data?.error || 'Löschen fehlgeschlagen'); }
   };
 
+  const handleResetPassword = async () => {
+    try {
+      const { data } = await adminApi.post(`/admin/customers/${resetTarget.id}/reset-password`);
+      setResetTarget(null);
+      setResetResult({ name: resetTarget.name, email: resetTarget.email, password: data.generatedPassword });
+    } catch (err) { alert(err.response?.data?.error || 'Fehler beim Zurücksetzen'); }
+  };
+
   const f = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   if (loading) return <div className="loading-state"><div className="spinner" /> Wird geladen...</div>;
@@ -86,6 +96,7 @@ export default function Customers() {
                   <td>
                     <div className="table-actions">
                       <button className="btn-icon" onClick={() => openEdit(c)} title="Bearbeiten"><Pencil size={14} /></button>
+                      <button className="btn-icon" onClick={() => setResetTarget(c)} title="Passwort zurücksetzen"><KeyRound size={14} /></button>
                       <button className="btn-icon danger" onClick={() => setDelTarget(c)} title="Löschen"><Trash2 size={14} /></button>
                     </div>
                   </td>
@@ -185,6 +196,55 @@ export default function Customers() {
             </div>
             <div className="modal-actions" style={{ marginTop: 20 }}>
               <button className="btn btn-primary" onClick={() => setCredentials(null)}>Verstanden</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {resetTarget && (
+        <div className="modal-overlay" onClick={() => setResetTarget(null)}>
+          <div className="modal" style={{ maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Passwort zurücksetzen</h2>
+              <button className="modal-close" onClick={() => setResetTarget(null)}><X size={20} /></button>
+            </div>
+            <p className="confirm-text">
+              Ein neues Einmalpasswort für <strong>{resetTarget.name}</strong> generieren und per E-Mail versenden?
+              Der Kunde wird beim nächsten Login zur Passwortänderung aufgefordert.
+            </p>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setResetTarget(null)}>Abbrechen</button>
+              <button className="btn btn-primary" onClick={handleResetPassword}>Zurücksetzen & E-Mail senden</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {resetResult && (
+        <div className="modal-overlay" onClick={() => setResetResult(null)}>
+          <div className="modal" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <KeyRound size={18} style={{ color: 'var(--accent)' }} /> Passwort zurückgesetzt
+              </h2>
+              <button className="modal-close" onClick={() => setResetResult(null)}><X size={20} /></button>
+            </div>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20 }}>
+              Das neue Einmalpasswort für <strong>{resetResult.name}</strong> wurde per E-Mail versendet.
+            </p>
+            <div style={{ background: 'var(--bg)', borderRadius: 8, padding: 16, display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Neues Einmalpasswort</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 16, fontWeight: 700, letterSpacing: '0.08em', color: 'var(--accent)' }}>{resetResult.password}</span>
+                  <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: 12 }} onClick={() => copyToClipboard(resetResult.password, 'reset')}>
+                    {copied === 'reset' ? <Check size={13} /> : <Copy size={13} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-primary" onClick={() => setResetResult(null)}>Schließen</button>
             </div>
           </div>
         </div>
